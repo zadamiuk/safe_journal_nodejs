@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>rejestracja</title>
+    <script>
+        type="text/javascript"
+    </script>
+</head>
+<body>
+<div class="container">
+        <h1> Rejestracja </h1>
+        
+        <h5>Ważne:
+        Zastosuj hasło, którego nie używasz w innym systemie.
+            <br>
+            Hasło nie powinno być nigdzie zapisane ani nie powinno zawierać wyrazów lub znaków, które można z Tobą identyfikować
+        </h5>
+        <form action="/rejestracja" method="post">
+            <table class="form">
+                <tr>
+                    <td class="input">
+                        <label for= "login" >
+                            login
+                        </label>
+                    </td>
+                    <td class="input">
+                        <input type = "text"
+                               name = "login"
+                             >          
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input">
+                        <label for="password">
+                            hasło (min. 10 znaków)
+                        </label>
+                    </td>
+                    <td class="input">
+                        <input type = "password"
+                               name = "password"
+                               minlength="10" required>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="input">
+                        <label for="password">
+                             powtórz hasło
+                        </label>
+                    </td>
+                    <td class="input">
+                        <input type = "password"
+                               name = "reppassowrd"
+                               minlength="10" required>
+                    </td>
+                </tr>
+                    <td class="submit" colspan="2">
+                        <button class="submit"
+                                type="submit"> Add
+                        </button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+ </div>
+</body>
+</html>

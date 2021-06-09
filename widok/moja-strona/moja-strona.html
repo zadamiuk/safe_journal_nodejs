@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>notatki</title>
+</head>
+<style>
+    h2 {text-align: center;}
+</style>
+<header>
+    <h2>Moje zasoby</h2>
+</header>
+<aside>
+    <h4>Moje notatki: </h4>
+    <div class="container">
+        <table>
+            <thead>
+                <!-- <td>title</td> -->
+                <td class="input">
+                    <label for= "title" >
+                        Tytuł:
+                    </label>
+                </td>
+                
+                <td class="input">
+                    <input type = "text"
+                           name = "title">
+                </td>
+                
+                <!-- <td>date</td> -->
+                <td class="input">
+                    <label for= "date" >
+                        date
+                    </label>
+                </td>
+                <td class="input">
+                    <input type = "text"
+                           name = "date">
+                </td>
+            </thead>
+        </table>
+        <tr>
+            <td class="submit" colspan="2">
+                <button class="submit"
+                        type="submit">
+                    <a href="/nowa-notatka"> New </a>
+                </button>
+            </td>
+        </tr>
+    </div>
+</aside>
