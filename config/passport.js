@@ -14,7 +14,8 @@ module.exports = function(passport) {
         login: login
       }).then(user => {
         if (!user) {
-          return done(null, false, { message: 'That login is not registered' });
+          return done(null, false, { message: 'Please try again' });
+          // return done(null, false, { message: 'That login is not registered' });
           //uwaga czy komunikat nie powinien zdradzac mniej?
         }
 
@@ -26,7 +27,8 @@ module.exports = function(passport) {
           if (isMatch) {
             return done(null, user);
           } else {
-            return done(null, false, { message: 'Password incorrect' });
+            return done(null, false, { message: 'Please try again' });
+            // return done(null, false, { message: 'Password incorrect.' });
             //uwaga czy komunikat nie powinien zdradzac mniej?
           }
         });
@@ -38,6 +40,7 @@ module.exports = function(passport) {
   passport.serializeUser(function(user, done) {
     done(null, user.id);
   });
+  // 
 
   passport.deserializeUser(function(id, done) {
     User.findById(id, function(err, user) {
