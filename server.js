@@ -1,7 +1,7 @@
 
 const express = require('express');
-// const expressLayouts = require('express-ejs-layouts');
-// const mongoose = require('mongoose');
+const expressLayouts = require('express-ejs-layouts');
+const mongoose = require('mongoose');
 // const passport = require('passport');
 // const flash = require('connect-flash');
 // const session = require('express-session');
@@ -12,24 +12,24 @@ const app = express()
 // // Passport Config
 // require('./config/passport')(passport);
 
-// // DB Config
-// const db = require('./config/keys').mongoURI;
+// DB Config
+const db = require('./config/keys').mongoURI;
 
-// // Connect to MongoDB
-// mongoose
-//   .connect(
-//     db,
-//     { useNewUrlParser: true ,useUnifiedTopology: true}
-//   )
-//   .then(() => console.log('MongoDB Connected'))
-//   .catch(err => console.log(err));
+// Connect to MongoDB
+mongoose
+  .connect(
+    db,
+    { useNewUrlParser: true ,useUnifiedTopology: true}
+  )
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 
-//   // EJS - zamiast HTML
-// app.use(expressLayouts);
-// app.set('view engine', 'ejs');
+  // EJS - zamiast HTML
+app.use(expressLayouts);
+app.set('view engine', 'ejs');
 
-// // Express body parser
-// app.use(express.urlencoded({ extended: true }));
+// Express body parser
+app.use(express.urlencoded({ extended: false }));
 
 // // Express session
 // app.use(
@@ -57,8 +57,8 @@ const app = express()
 
 
   // Routes
-app.use('/', require('./routes/index.js'));
-app.use('/users', require('./routes/users.js'));
+app.use('/', require('./routes/index'));
+app.use('/users', require('./routes/users'));
 
 const PORT = process.env.PORT || 3000;
 
