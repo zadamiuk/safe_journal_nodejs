@@ -1,5 +1,5 @@
 const LocalStrategy = require('passport-local').Strategy;
-const mongoose=require('mongoose');
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs'); // for comparing the passwords
 
 // Load User model
