@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
+
+// User model
+const User = require('../models/User')
 
 //Login Page
 router.get('/login', (req,res) => res.render('login'));
@@ -31,10 +35,39 @@ router.post('/register',(req,res)=>{
     res.render('register',{
         errors,
         login,
+        password,
+        password2
         
     });
     } else {
-        res.send('pass');
+       //Validation passed
+
+    //    Creating Models for mongoose
+    User.findOne({login: login})
+    .then(user=> {
+        if(user) {
+//User exists
+errors.push({msg: 'Login is already registered. Please log in or change the login'});
+res.render('register', {
+    errors,
+    login,
+    password,
+    password2
+});
+
+        } else {
+const newUser = new User ({
+    login: login,
+    password: password
+});
+        console.log(newUser)
+        res.send('hello new user');
+}
+
+
+    });
+
+
     }
 
 
