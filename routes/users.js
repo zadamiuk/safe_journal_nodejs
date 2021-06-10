@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const passport = require('passport');
 
 // User model
 const User = require('../models/User')
@@ -28,7 +29,7 @@ router.post('/register',(req,res)=>{
     }
     //Check password length
     if(password.length<10){
-        errors.push({msg: "Password should be at least 10 characters"}); 
+        errors.push({msg: "Password should be at least 10 characters long"}); 
     }
 
     if(errors.length>0){
@@ -47,6 +48,8 @@ router.post('/register',(req,res)=>{
     .then(user=> {
         if(user) {
 //User exists
+
+// UWAGA: SPRAWDZIĆ POŁĄCZENIE Z BAZĄ DANYCH, BO NIE WIDZĘ, ŻEBY SIĘ WRZUCAŁO
 errors.push({msg: 'Login is already registered. Please log in or change the login'});
 res.render('register', {
     errors,
@@ -60,8 +63,23 @@ const newUser = new User ({
     login: login,
     password: password
 });
-        console.log(newUser)
-        res.send('hello new user');
+     // Hash Password
+     // genSalt - generate the salt for hashing
+     bcrypt.genSalt(10,(err, salt) => 
+     bcrypt.hash(newUser.password, salt, (error,hash) => {
+    if(err) throw err;
+    //set password to hashed 
+    newUser.password=hash;
+    // save user
+    newUser.save()
+        .then(user=> {
+            req.flash('success_msg', 'You are registered. Please log in');
+            res.redirect('/users/login');
+        })
+        .catch(err=>console.log(err))
+
+     })
+     )
 }
 
 
@@ -73,5 +91,25 @@ const newUser = new User ({
 
 });
 
+// Login Handle
+router.post('/login', (req,res,next)=>{
+passport.authenticate('local',{
+    successRedirect: '/dashboard',
+    //po sukcesie lecimy do dashboard
+    failureRedirect: '/users/login',
+    failureFlash: true
+
+})(req,res,next);
+
+});
+
+// Logout Handle
+router.get('/logout',(req,res)=>
+{
+req.logout();
+req.flash('success_msg', 'You are logged out');
+res.redirect('/users/login');
+
+});
 
 module.exports=router;
