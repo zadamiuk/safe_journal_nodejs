@@ -6,7 +6,7 @@ const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 //Note model
 const Note = require('../models/Note');
 
-router.get('/add', ensureAuthenticated, (req, res) => res.render('new'))
+router.get('/new', ensureAuthenticated, (req, res) => res.render('new'))
 
 //router.get('/add', ensureAuthenticated, (req,res) => res.render('new'));
 
@@ -39,7 +39,11 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
 // All notes
 router.get('/', ensureAuthenticated, (req, res) =>{
     const notes = Note.find({user: req.user.login}).sort({date: 'desc'})
-    res.render('all', { notes })
+    if(notes) {
+        res.render('all', { notes })
+    } else {
+        res.render('no_notes')
+    }
 })
 
 router.get('/edit/:id', ensureAuthenticated, (req, res)=>{
