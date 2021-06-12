@@ -107,7 +107,7 @@ router.put('/edit/:id', ensureAuthenticated, (req,res) => {
 })
 
 // Delete
-router.get('/delete/:id', function(req, res) {
+router.get('/delete/:id', ensureAuthenticated, function(req, res) {
     Note.findByIdAndRemove(req.params.id, function (err, project) {
       if (err) {
         req.flash('errorMsg', 'User not deleted successfully.');
