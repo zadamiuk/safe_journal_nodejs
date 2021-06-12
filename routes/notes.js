@@ -3,6 +3,7 @@ const router = express.Router()
 
 const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 
+
 //Note model
 const Note = require('../models/Note');
 
@@ -32,12 +33,34 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
         newNote.user = req.user.login
         newNote.save()
         req.flash('success_msg', 'Note added successfully');
-        res.redirect('/notes');
+        res.redirect('/dashboard');
     }
 })
 
 // All notes
-router.get('/', ensureAuthenticated, (req, res) =>{
+router.get('/all', ensureAuthenticated, (req, res) => {
+   // const notes = Note.find({user: req.user.login}).fetch();
+   Note.find({}, function(err,data) { 
+    if(err){
+        console.log(err);
+        res.send(500).status;
+    }
+    else {
+        res.render('all.ejs', {
+        Note: data});
+        }            
+  });
+  //res.render('all.ejs', { link: "edit" });
+  /*   console.log(notes.title)
+    const notes1 ={_id:1,
+    title:'a', description:'a',date:'1988-03-21',user:'a'}
+    if(notes) {
+        res.render('all', { 'data':note})
+    } else {
+        res.render('no_notes')
+    } */
+})
+router.post('/all', ensureAuthenticated, (req, res) =>{
     const notes = Note.find({user: req.user.login}).sort({date: 'desc'})
     if(notes) {
         res.render('all', { notes })
@@ -46,7 +69,8 @@ router.get('/', ensureAuthenticated, (req, res) =>{
     }
 })
 
-router.get('/edit/:id', ensureAuthenticated, (req, res)=>{
+router.get('/edit', ensureAuthenticated, (req, res)=>{
+  
     const note = Note.findById(req.params.id)
     res.render('/notes/edit', {note})
 })
