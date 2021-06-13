@@ -9,7 +9,7 @@ const KeySchema = new mongoose.Schema({
         type: String,
         required: true
       },
-      title: {
+      _id_note: {
         type: String,
         required: true
       },

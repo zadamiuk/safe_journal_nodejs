@@ -50,6 +50,7 @@ const Note = require('../models/Note');
 
 //Key model
 const Key = require('../models/Key');
+const { send } = require('process');
 
 router.get('/new', ensureAuthenticated, (req, res) => res.render('new'))
 
@@ -76,9 +77,7 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
 
     // encryption
         const encrypteddDescription=encrypt(description,key,iv);
-        const newKey = new Key({value: key, iv: iv, title});
-        newKey.user = req.user.login
-        newKey.save()
+        
 
         console.log(encrypteddDescription);
 
@@ -91,6 +90,9 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
         const newNote = new Note({title, description: encrypteddDescription.content}) 
         newNote.user = req.user.login
         newNote.save()
+        const newKey = new Key({value: key, iv: iv, _id_note: newNote._id});
+        newKey.user = req.user.login
+        newKey.save()
         req.flash('success_msg', 'Note added successfully'); // to z jakiegos powodu nie dziala
         res.redirect('/notes/all');
     }
@@ -153,7 +155,17 @@ router.get('/all', ensureAuthenticated,  (req, res) => {
          res.send(500).status;
      }
      else {
-
+        data.forEach( function( data1){
+            Key.find({user: req.user.login, title:data.title}, function(err,data2) {
+                if(err){
+                    console.log(err);
+                    res.send(500).status;
+                }else{
+                    console.log(data2.key, data2.iv);
+                
+                    //data1.description=decrypt(data1.description, data2.key, data2.iv)
+                }
+             })})
         res.render('all.ejs', {
         Note: data});
         }            
@@ -242,7 +254,40 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res) {
     });
   });
   
-
+  router.get('/note/:id', ensureAuthenticated, function(req, res) {
+    Key.findOne({_id_note: req.params.id},function (err, key) {
+    
+        if(err){
+            console.log(err);
+            res.send(500).status;
+        }
+        else{
+            Note.findById(req.params.id, function (err, data) {
+    
+                if(err){
+                    console.log(err);
+                    //res.send(500).status;
+                }
+                else {
+                    console.log(data.description);
+                    console.log("key:  ", key.value);
+                    console.log("iv:  ", key.iv);
+                   const text = decrypt(data.description, key.value, key.iv) 
+                   console.log(1);
+                   console.log(text);
+                   res.send(text)
+                   //res.render('note.ejs', {
+                   //Note: data});
+                   }            
+              });
+           
+        }
+    })
+    //res.send(req.params.id)
+    
+        })
+       ;
+  
 // router.get('/delete/:id', ensureAuthenticated, (req, res)=>{
 //     const note = Note.findById(req.params.id)
 //     res.render('/notes/delete', {note})

@@ -17,6 +17,8 @@
           <tr>
             <td><b><%= data.title %></b><br> <%= data.date.toDateString() %></td>
             <td style="width: 20%"><a href="/notes/delete/<%= data._id %>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete note <%= data.title %>?');" class="fixed" data-q_id=data._id >Delete</a></td>
+            <td style="width: 20%"><a href="/notes/note/<%= data._id %>" class="btn btn-outline-danger" class="fixed" data-q_id=data._id >Show</a></td>
+         
           </tr>
           <tr>
             <td><p><i><%= data.description %></i></p></td>
