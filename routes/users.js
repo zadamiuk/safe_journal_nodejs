@@ -47,7 +47,6 @@ router.post('/register',(req,res)=>{
     .then(user=> {
         if(user) {
 //User exists
-
 errors.push({msg: 'Login is already registered. Please log in or change the login'});
 res.render('register', {
     errors,

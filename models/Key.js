@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const KeySchema = new mongoose.Schema({
     value: {
         type: String,
+        // type: Buffer,
         required: true
       },
       iv: {
         type: String,
+        // type: Buffer,
         required: true
       },
       _id_note: {
@@ -15,6 +17,7 @@ const KeySchema = new mongoose.Schema({
       },
       user: {
         type: String,
+        
         required: true
       }
 });

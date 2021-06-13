@@ -2,20 +2,19 @@ const express = require('express');
 const router = express.Router()
 const crypto = require('crypto');
 
-// TUTAJ sa rozne wersje, ze raz klucz sie zmienia raz nie - mozna odkomentowywac
 
-const algorithm = 'aes-256-ctr'; //wybieramy algorytm szyfrowania
-// const key = 'vOVH6sdmpNWjRRIqCc7rdxs01lwHzfr3'; //w wersji: wszyscy taki sam klucz
-const key = crypto.randomBytes(32); // losowo generowany klucz
-const iv = crypto.randomBytes(16); // losowo generowany iv
-// const iv = 'ff91247ddf948fbda6dc9ae732e295f3'; //zawsze taki sam - opcja tylko dla testowania
-//iv - wektor inicjujacy
+
+const algorithm = 'aes-256-ctr'; //selecting the algorithm 
+// const key = 'vOVH6sdmpNWjRRIqCc7rdxs01lwHzfr3'; // a code for a simple version for testing
+// const iv = 'ff91247ddf948fbda6dc9ae732e295f3';  // a code for a simple version for testing
+const key = crypto.randomBytes(32); // key generated randomly
+const iv = crypto.randomBytes(16); // iv generated randomly
+
 
 
 const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 
 //  Encryption function
-
 function encrypt(text,key1,iv1) {
     
     const cipher = crypto.createCipheriv(algorithm, key1, iv1);
@@ -31,8 +30,8 @@ function encrypt(text,key1,iv1) {
 
 function decrypt(text, key1, iv1) {
     //text - plain text
-    //key1 - klucz szyfrujacy dla dokladnie tej notatki
-    //iv1 - wektor inicjujący dla dokladnie tej notatki
+    //key1 - key - encryption scheme
+    //iv1 - initalization vector
 
 
 
@@ -43,7 +42,6 @@ function decrypt(text, key1, iv1) {
     return decrpyted.toString();
 
 }
-// const key = require('../config/keys').key; //szyfrowanie od Kingi
 
 //Note model
 const Note = require('../models/Note');
@@ -81,7 +79,7 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
 
         console.log(encrypteddDescription);
 
-    // decryption for testing - TRZEBA USUNĄĆ POTEM! - POTWIERDZENIE, ZE DZIALA DESZYFROWANIE DLA TYCH DANYCH
+    // decryption for testing 
         var note1=decrypt(encrypteddDescription.content,key,encrypteddDescription.iv);
         console.log("Odszyfrowane:" + note1);
 
@@ -90,10 +88,11 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
         const newNote = new Note({title, description: encrypteddDescription.content}) 
         newNote.user = req.user.login
         newNote.save()
+
+        //creating a key and adding to database - NOT EVERYTHING CORRECT - iv and key 
         const newKey = new Key({value: key, iv: iv, _id_note: newNote._id});
         newKey.user = req.user.login
         newKey.save()
-        req.flash('success_msg', 'Note added successfully'); // to z jakiegos powodu nie dziala
         res.redirect('/notes/all');
     }
 })
@@ -101,14 +100,11 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
 // All notes
 router.get('/all', ensureAuthenticated,  (req, res) => {
 
-    // TUTAJ - trzeba zrobić tak, że:
-    //     1 dostajemy się do notatki
-    //     dostajemy się do klucza odpowiadającego tej notatce (loginem autora i tytułem)
-    //     za pomoca klucza i iv odszyfrowujemy tresc 
-    //     przekazujemy tresc odszyfrowana
 
 
-// WIELKA IMPROWIZACJA KLUCZE
+// CODE BELOW: NOT EVERYTHING CORRECT
+//  - A PART OF CODE TO COMMUNICATE WITH DATABASE TO STORE KEYS SAFELY
+
 //   Note.find({user: req.user.login}, function(err,data) { 
     
 //      if(err){
@@ -147,7 +143,7 @@ router.get('/all', ensureAuthenticated,  (req, res) => {
 
 
 
-//  //wersja dzialajaca, bez odszyfrowywania:
+// commented code - not everything is correct 
  Note.find({user: req.user.login}, function(err,data) { 
     
      if(err){
@@ -155,17 +151,17 @@ router.get('/all', ensureAuthenticated,  (req, res) => {
          res.send(500).status;
      }
      else {
-        data.forEach( function( data1){
-            Key.find({user: req.user.login, title:data.title}, function(err,data2) {
-                if(err){
-                    console.log(err);
-                    res.send(500).status;
-                }else{
-                    console.log(data2.key, data2.iv);
+        // data.forEach( function( data1){
+        //     // Key.find({user: req.user.login, title:data.title}, function(err,data2) {
+        //     //     if(err){
+        //     //         console.log(err);
+        //     //         res.send(500).status;
+        //     //     }else{
+        //     //         console.log(data2.key, data2.iv);
                 
-                    //data1.description=decrypt(data1.description, data2.key, data2.iv)
-                }
-             })})
+        //     //         //data1.description=decrypt(data1.description, data2.key, data2.iv)
+        //     //     }
+        //     //  })})
         res.render('all.ejs', {
         Note: data});
         }            
@@ -173,32 +169,26 @@ router.get('/all', ensureAuthenticated,  (req, res) => {
  })
 
  
-// tego chyba nigdy nie uzywamy
- router.post('/all', ensureAuthenticated, (req, res) =>{
-     var notes = Note.find({user: req.user.login}).sort({date: 'desc'})
-     if(notes) {
-        // console.log('test3')
-        // notes.forEach(function(key,iv)  {
-        //   description=decrypt(description,key,iv);
-        //   console.log('test1')
-        // });
-
-        //  var note1=decrypt(encrypteddDescription,key,iv);
-        //  console.log("Odszyfrowane:" + note1);
+// // UNUSED PART BEL0W:
+//  router.post('/all', ensureAuthenticated, (req, res) =>{
+//      var notes = Note.find({user: req.user.login}).sort({date: 'desc'})
+//      if(notes) {
 
         
-         res.render('all', { notes })
-     } else {
-          //to raczej nie działa/nie jest uruchamiane(?)
-         res.render('no_notes')
-     }
- })
+//          res.render('all', { notes })
+//      } else {
+//           //to raczej nie działa/nie jest uruchamiane(?)
+//          res.render('no_notes')
+//      }
+//  })
  
+// UNUSED PART BELOW:
 router.get('/edit/:id', ensureAuthenticated, (req, res)=>{
     const note = Note.findById(req.params.id)
     res.render('/notes/edit', {note})
 })
 
+// UNUSED PART BELOW:
 router.put('/edit/:id', ensureAuthenticated, (req,res) => {
     // const {title, description} = req.body
     // Note.findByIdAndUpdate(req.params.id, {title, description})
@@ -212,7 +202,7 @@ router.put('/edit/:id', ensureAuthenticated, (req,res) => {
     //     });
     // }
 
-    // find product and update
+    // find and update
     Note.findByIdAndUpdate(req.params.id, {
         $set: req.body
     }, {new: true})
@@ -266,7 +256,7 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res) {
     
                 if(err){
                     console.log(err);
-                    //res.send(500).status;
+                    res.send(500).status;
                 }
                 else {
                     console.log(data.description);
@@ -288,40 +278,5 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res) {
         })
        ;
   
-// router.get('/delete/:id', ensureAuthenticated, (req, res)=>{
-//     const note = Note.findById(req.params.id)
-//     res.render('/notes/delete', {note})
-// })
-
-
-// router.delete('/delete/:id', ensureAuthenticated, (req,res)=>{
-//     // Note.findByIdAndDelete(req.params.id)
-//     // req.flash('success_msg', 'Note Deleted Successfully')
-//     // res.redirect('/notes')
-//     Note.findByIdAndRemove(req.params.id)
-//     .then(data => {
-//         if (!data) {
-//             return res.status(404).send({
-//                 success: false,
-//                 message: "Note not found with id " + req.params.id
-//             });
-//         }
-//         res.send({
-//             success: true,
-//             message: "Note successfully deleted!"
-//         });
-//     }).catch(err => {
-//     if (err.kind === 'ObjectId' || err.name === 'NotFound') {
-//         return res.status(404).send({
-//             success: false,
-//             message: "Note not found with id " + req.params.id
-//         });
-//     }
-//     return res.status(500).send({
-//         success: false,
-//         message: "Could not delete Note with id " + req.params.id
-//     });
-// });
-// })
 
 module.exports = router;
