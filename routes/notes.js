@@ -2,29 +2,22 @@ const express = require('express');
 const router = express.Router()
 const crypto = require('crypto');
 
+// TUTAJ sa rozne wersje, ze raz klucz sie zmienia raz nie - mozna odkomentowywac
 
-// const algorithm = 'aes-256-cbc'; // version 1
-const algorithm = 'aes-256-ctr'; //version 2
-const key = 'vOVH6sdmpNWjRRIqCc7rdxs01lwHzfr3'; //version 2
-// const key = crypto.randomBytes(32); //chyba jeden klucz dla wszystkich, czy to bezpieczne? //version 1
-const iv = crypto.randomBytes(16); //version 1 and 2
+const algorithm = 'aes-256-ctr'; //wybieramy algorytm szyfrowania
+// const key = 'vOVH6sdmpNWjRRIqCc7rdxs01lwHzfr3'; //w wersji: wszyscy taki sam klucz
+const key = crypto.randomBytes(32); // losowo generowany klucz
+const iv = crypto.randomBytes(16); // losowo generowany iv
+// const iv = 'ff91247ddf948fbda6dc9ae732e295f3'; //zawsze taki sam - opcja tylko dla testowania
+//iv - wektor inicjujacy
 
 
 const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 
-//encryption function
+//  Encryption function
 
 function encrypt(text,key1,iv1) {
-    //anything here
-
-    // version 1
-    // let cipher = crypto.createCipheriv('aes-256-cbc',Buffer.from(key1), iv1);
-    // let encrypted = cipher.update(text);
-    // encrypted = Buffer.concat([encrypted, cipher.final()]);
-    // return { iv: iv.toString('hex'), encryptedData: encrypted.toString('hex') };
-
-
-    // version 2
+    
     const cipher = crypto.createCipheriv(algorithm, key1, iv1);
 
     const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
@@ -36,21 +29,16 @@ function encrypt(text,key1,iv1) {
 
 }
 
-function decrypt(text, key1,iv1) {
-     //anything here
+function decrypt(text, key1, iv1) {
+    //text - plain text
+    //key1 - klucz szyfrujacy dla dokladnie tej notatki
+    //iv1 - wektor inicjujący dla dokladnie tej notatki
 
-    // version 1
-    // let iv = Buffer.from(text.iv, 'hex');
-    // let encryptedText = Buffer.from(text.encryptedData, 'hex');
-    // let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key1), iv);
-    // let decrypted = decipher.update(encryptedText);
-    // decypted = Buffer.concat([decrypted, decipher.final()]);
-    // return decrypted.toString();
 
-    // version 2
-    const decipher = crypto.createDecipheriv(algorithm, key1, Buffer.from(text.iv, 'hex'));
 
-    const decrpyted = Buffer.concat([decipher.update(Buffer.from(text.content, 'hex')), decipher.final()]);
+    const decipher = crypto.createDecipheriv(algorithm, key1, Buffer.from(iv1, 'hex'));
+
+    const decrpyted = Buffer.concat([decipher.update(Buffer.from(text, 'hex')), decipher.final()]);
 
     return decrpyted.toString();
 
@@ -59,6 +47,9 @@ function decrypt(text, key1,iv1) {
 
 //Note model
 const Note = require('../models/Note');
+
+//Key model
+const Key = require('../models/Key');
 
 router.get('/new', ensureAuthenticated, (req, res) => res.render('new'))
 
@@ -82,17 +73,22 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
             description 
         });
     } else {
+
     // encryption
         const encrypteddDescription=encrypt(description,key,iv);
+        const newKey = new Key({value: key, iv: iv, title});
+        newKey.user = req.user.login
+        newKey.save()
+
         console.log(encrypteddDescription);
 
-        // decryption for testing
-        var note1=decrypt(encrypteddDescription,key,iv);
+    // decryption for testing - TRZEBA USUNĄĆ POTEM! - POTWIERDZENIE, ZE DZIALA DESZYFROWANIE DLA TYCH DANYCH
+        var note1=decrypt(encrypteddDescription.content,key,encrypteddDescription.iv);
         console.log("Odszyfrowane:" + note1);
 
         // adding to database
-        // const newNote = new Note({title, description: encrypteddDescription.encryptData}) //version 1
-        const newNote = new Note({title, description: encrypteddDescription.content}) //version 2
+
+        const newNote = new Note({title, description: encrypteddDescription.content}) 
         newNote.user = req.user.login
         newNote.save()
         req.flash('success_msg', 'Note added successfully'); // to z jakiegos powodu nie dziala
@@ -101,24 +97,84 @@ router.post('/new', ensureAuthenticated, (req,res)=>{
 })
 
 // All notes
-router.get('/all', ensureAuthenticated, (req, res) => {
-    // const notes = Note.find({user: req.user.login}).fetch();
-    Note.find({user: req.user.login}, function(err,data) { 
+router.get('/all', ensureAuthenticated,  (req, res) => {
+
+    // TUTAJ - trzeba zrobić tak, że:
+    //     1 dostajemy się do notatki
+    //     dostajemy się do klucza odpowiadającego tej notatce (loginem autora i tytułem)
+    //     za pomoca klucza i iv odszyfrowujemy tresc 
+    //     przekazujemy tresc odszyfrowana
+
+
+// WIELKA IMPROWIZACJA KLUCZE
+//   Note.find({user: req.user.login}, function(err,data) { 
+    
+//      if(err){
+//          console.log(err);
+//          res.send(500).status;
+
+//      }
+//      else {
+//         const secret=Key.findOne({user: req.user.login, 
+//             title: data.title})
+
+//         // .catch(err => {
+//         //     console.log(err);
+//         //     res.send(500).status;
+//         // });
+     
+//         secret.select('key iv');
+//         secret.exec(function(err, secretSet){
+//          console.log('key: %s, iv: %s',secretSet.key, secretSet.iv);
+//         });
+
+//         await Key.findOne({ user: req.user.login, 
+//             title: data.title }, 'key iv').exec();
+
+//         console.log(data);
+
+        
+//    res.render('all.ejs', {Note: data});
+//      }
+
+                    
+//    })
+   
+// })
+   
+
+
+
+//  //wersja dzialajaca, bez odszyfrowywania:
+ Note.find({user: req.user.login}, function(err,data) { 
+    
      if(err){
          console.log(err);
          res.send(500).status;
      }
      else {
-         res.render('all.ejs', {
-         Note: data});
-         }            
+
+        res.render('all.ejs', {
+        Note: data});
+        }            
    });
  })
 
-
+ 
+// tego chyba nigdy nie uzywamy
  router.post('/all', ensureAuthenticated, (req, res) =>{
-     const notes = Note.find({user: req.user.login}).sort({date: 'desc'})
+     var notes = Note.find({user: req.user.login}).sort({date: 'desc'})
      if(notes) {
+        // console.log('test3')
+        // notes.forEach(function(key,iv)  {
+        //   description=decrypt(description,key,iv);
+        //   console.log('test1')
+        // });
+
+        //  var note1=decrypt(encrypteddDescription,key,iv);
+        //  console.log("Odszyfrowane:" + note1);
+
+        
          res.render('all', { notes })
      } else {
           //to raczej nie działa/nie jest uruchamiane(?)
@@ -223,4 +279,4 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res) {
 // });
 // })
 
-module.exports = router
+module.exports = router;

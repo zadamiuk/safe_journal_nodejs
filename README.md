@@ -2,8 +2,8 @@
 
 ## Please install:
 npm install
-npm i express bcryptjs passport passport-local ejs express-ejs-layouts mongoose connect-flash express-session mongodb crypto
-
+npm i express bcryptjs passport passport-local ejs express-ejs-layouts mongoose connect-flash express-session mongodb 
+npm i crypto buffer 
 npm i -D nodemon
 
 

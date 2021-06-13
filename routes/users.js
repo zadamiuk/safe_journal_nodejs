@@ -16,7 +16,6 @@ router.get('/register', (req,res) => res.render('register'));
 // Register Handle
 router.post('/register',(req,res)=>{
     const{login, password, password2}=req.body;
-    //trzeba hashowanie tutaj dać
     let errors =[];
     //Check required fields
     if(!login || !password || !password2){

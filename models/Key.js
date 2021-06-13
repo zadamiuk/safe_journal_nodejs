@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 
-const Key = new mongoose.Schema({
+const KeySchema = new mongoose.Schema({
     value: {
+        type: String,
+        required: true
+      },
+      iv: {
         type: String,
         required: true
       },
@@ -9,16 +13,13 @@ const Key = new mongoose.Schema({
         type: String,
         required: true
       },
-      date: {
-        type: Date,
-        default: Date.now
-      },
       user: {
         type: String,
         required: true
       }
-})
+});
 
-const Note = mongoose.model('Note', NoteSchema)
 
-module.exports = Note
+const Key = mongoose.model('Key', KeySchema)
+
+module.exports = Key;
