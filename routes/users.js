@@ -49,7 +49,6 @@ router.post('/register',(req,res)=>{
         if(user) {
 //User exists
 
-// UWAGA: SPRAWDZIĆ POŁĄCZENIE Z BAZĄ DANYCH, BO NIE WIDZĘ, ŻEBY SIĘ WRZUCAŁO
 errors.push({msg: 'Login is already registered. Please log in or change the login'});
 res.render('register', {
     errors,
@@ -64,7 +63,7 @@ const newUser = new User ({
     password: password
 });
      // Hash Password
-     // genSalt - generate the salt for hashing
+     // genSalt - here we generate the salt for hashing
      bcrypt.genSalt(10,(err, salt) => 
      bcrypt.hash(newUser.password, salt, (error,hash) => {
     if(err) throw err;
