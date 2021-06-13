@@ -1,6 +1,6 @@
 
 <div class="row mt-4 mb-5">
-  <!-- <div class="card mb-4"> -->
+
     <div class="col-md-10 m-auto">
   <div class="card-body">
     <form action="/notes/all" method="GET">
@@ -8,7 +8,7 @@
         <thead>
           <tr>
           <th><h4>Your notes:</h4></th>
-          <th><a href="/notes/new" class="btn btn-primary">Add new note</a></th>
+          <th><a href="/notes/new" class="btn btn-success">Add new note</a></th>
         </tr>
           </thead>
         <tbody>
@@ -16,8 +16,8 @@
           
           <tr>
             <td><b><%= data.title %></b><br> <%= data.date.toDateString() %></td>
-            <td style="width: 20%"><a href="/notes/delete/<%= data._id %>" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to delete note <%= data.title %>?');" class="fixed" data-q_id=data._id >Delete</a></td>
-            <td style="width: 20%"><a href="/notes/note/<%= data._id %>" class="btn btn-outline-danger" class="fixed" data-q_id=data._id >Show</a></td>
+            <td style="width: 20%"><a href="/notes/note/<%= data._id %>" class="btn btn-secondary" class="fixed" data-q_id=data._id > Read (not working)</a></td>
+            <td style="width: 20%"><a href="/notes/delete/<%= data._id %>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete note <%= data.title %>?');" class="fixed" data-q_id=data._id >Delete</a></td>
          
           </tr>
           <tr>
@@ -31,6 +31,9 @@
 
   
 </form>
-<a href="/users/logout" class="btn btn-secondary">Logout</a>
+<div style ="position: absolute; bottom: 0; left: 85%">
+  <a href="/users/logout" class="btn btn-secondary pull-right" >Logout</a>
+</div>
+
 
 
